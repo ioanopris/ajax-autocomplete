@@ -1,0 +1,150 @@
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+
+<style>
+
+	.items{
+
+		border-bottom:1px solid #ccc;
+
+		width:300px; 
+
+		background:url("img/autocompleteIcons_pieces.png") no-repeat scroll 274px 2px transparent; 
+
+		color:#000;
+
+		}
+
+	.citycss{
+
+		background:url("img/autocompleteIcons_pieces.png") no-repeat scroll 274px -107px transparent; 
+
+		}
+
+	.items span{
+
+		font-size:13px;
+
+	}
+
+	#list a {text-decoration:none;cursor:pointer;display: block;}
+
+	#list a:hover, #list li.isselected a{color:#fff;}
+
+	#list li:hover, #list li.isselected a{background-color:#f66c24;}
+
+	#list {list-style:none;margin-left:40px;margin-top:4px;}
+
+	#city { width: 25em; }
+
+	.cLoading{background: url("img/loading.gif") no-repeat scroll 305px 50% transparent;}
+
+	
+
+	
+
+</style>
+
+	<script>
+
+	$(document).ready(function(){
+		$('#list li').live('click', function() {
+			var theid = $(this).attr('id');
+			console.log($(this).find("a").text());
+			$("#city").val($(this).find("a").text());
+			$('#list').hide();
+		});
+
+		/*
+
+		$('#list').live('focusout', function(){
+
+			$('#list').hide();
+
+		});
+
+		*/
+
+		$("#city").keyup(function(ed){
+			if(ed.which != 38 && ed.which != 40){					  
+				$('#list').children('li').remove();
+				var searchTerm = $('#city').val();
+				var searchReg = /^[a-zA-Z]+$/;
+				if((searchTerm !="") &&  (searchTerm.match(searchReg)))
+				{
+					$("#city").addClass("cLoading");
+						$.ajax({
+								url: "ajax.php",
+								dataType: "json",
+								data: {
+									maxRows: 6,
+									name_startsWith: searchTerm
+								},
+								success: function( data ) {
+									$('#list').children('li').remove();
+									$('#list').show();
+									$("#city").removeClass("cLoading");
+									for (var i in data) {
+										if (data[i].id == 45){
+											$('#list').append('<li class="items citycss" id ="'+
+															data[i].id+'"><a href ="#"> '+data[i].name+
+															', <span>('+data[i].iso+')</span></a></li>')
+										} else {
+											$('#list').append('<li class="items" id ="'+
+														data[i].id+'"><a href ="#"> '+data[i].name+
+														', <span>('+data[i].iso+')</span></a></li>')
+										}
+								   }
+								   $('#list').children('li').first().addClass("isselected");
+								}
+							});
+						console.log('sent ajax');
+					}
+					else 
+					{
+						console.log('dont send');
+					}
+				}
+				else {
+					var currentlySelected = $('#list').children('.isselected').first();
+					if(ed.which == 38){
+						if(currentlySelected.prev().length != 0){
+							currentlySelected.removeClass('isselected').prev().addClass('isselected');
+						}
+					}
+					else{
+						if(currentlySelected.next().length != 0){
+							currentlySelected.removeClass('isselected').next().addClass('isselected');
+						}
+					}
+				}
+		});
+	});
+	</script>
+
+
+
+
+
+<body>
+
+<div class="demo">
+
+
+
+	<div id="search_div">
+
+		<label for="city">Your city: </label>
+
+		<input id="city" />
+
+		<ul id ="list"></ul>
+
+	</div>
+
+
+
+
+
+</div><!-- End demo -->
+
+</body>
